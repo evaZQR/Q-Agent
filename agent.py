@@ -163,7 +163,7 @@ class Agent():
         
         # Debugging purposes
         #print(internal_thought)
-
+        #return 
         internalMemoryPrompt = data['internal_thought_memory']
         internalMemoryPrompt = internalMemoryPrompt.replace("{query}", query).replace("{internal_thought}", internal_thought).replace("{last_message}", self.last_message)
         self.updateMemory(internalMemoryPrompt, THOUGHTS)
@@ -232,5 +232,4 @@ class Agent():
 	    namespace=INFORMATION,
         )
 if __name__ == "__main__":
-    print("Starting the agent")
-    print(generate("早上好"))
+    print(data)
