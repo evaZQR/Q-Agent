@@ -378,12 +378,14 @@ Return one task per line in your response. The result must be a numbered list in
 #. First task
 #. Second task
 
-The number of each entry must be followed by a period. If your list is empty, write "There are no tasks to add at this time."
+The number of each entry must be followed by a period. If your list is empty(there is no need to add tasks),you should only write "Stop"
 Unless your list is empty, do not include any headers before your numbered list or follow your numbered list with any other output."""
 
     #print(f'\n*****TASK CREATION AGENT PROMPT****\n{prompt}\n')
     response = openai_call(prompt, max_tokens=2000)
     print(f'\n****TASK CREATION AGENT RESPONSE****\n{response}\n')
+    if response == "Stop":
+        return []
     new_tasks = response.split('\n')
     new_tasks_list = []
     for task_string in new_tasks:
@@ -415,9 +417,9 @@ Do not remove any tasks. Return the ranked tasks as a numbered list in the forma
 The entries must be consecutively numbered, starting with 1. The number of each entry must be followed by a period.
 Do not include any headers before your ranked list or follow your list with any other output."""
 
-    print(f'\n****TASK PRIORITIZATION AGENT PROMPT****\n{prompt}\n')
+    #print(f'\n****TASK PRIORITIZATION AGENT PROMPT****\n{prompt}\n')
     response = openai_call(prompt, max_tokens=2000)
-    print(f'\n****TASK PRIORITIZATION AGENT RESPONSE****\n{response}\n')
+    #print(f'\n****TASK PRIORITIZATION AGENT RESPONSE****\n{response}\n')
     if not response:
         print('Received empty response from priotritization agent. Keeping task list unchanged.')
         return
@@ -455,7 +457,7 @@ def execution_agent(objective: str, task: str) -> str:
     prompt = f'Perform one task based on the following objective: {objective}.\n'
     if context:
         prompt += 'Take into account these previously completed tasks:' + '\n'.join(context)
-    prompt += f'\nYour task: {task}\nResponse:'
+    prompt += f'\nYour task: {task}\n Response:'
     return openai_call(prompt, max_tokens=2000)
 
 
