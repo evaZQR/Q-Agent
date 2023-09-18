@@ -5,7 +5,7 @@
 class Tool(args):
     def __init__(self,args):
         self.description = "<Tool name> the function of this tool, its input and its output"
-        self.description = """
+        self.jsonload = """
         {
             "args1": "what args1 should be..."
             "atgs2": "what args2 should be..."
