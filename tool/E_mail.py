@@ -36,6 +36,5 @@ def send_email(Message,add):
         print('success')
     except smtplib.SMTPException as e:
         print('error',e) #打印错误
-if __name__ == "__main__":
-    send_email("设置是OK的")
+
 
