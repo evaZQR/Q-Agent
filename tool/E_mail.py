@@ -53,7 +53,7 @@ class SendEmail():
     def jsonrun(self,json):
         message = json['message']
         address = json['address']
-        SendEmail.run(message,address)
+        return SendEmail.run(message,address)
     @staticmethod
     def run(message,address): 
         mail_host = 'smtp.163.com'  
@@ -86,6 +86,14 @@ class SendEmail():
                 sender,receivers,message.as_string()) 
             #退出
             smtpObj.quit() 
-            print('success')
+            return "send email successfully"
         except smtplib.SMTPException as e:
             print('error',e) #打印错误
+            return f"send email failed because of the {e}"
+if __name__ == '__main__':
+    jsonEVA = {
+        "message": "Good Evening",
+        "address": "2539906978@qq.com",
+    }
+    sendemail = SendEmail()
+    print(sendemail.jsonrun(jsonEVA))

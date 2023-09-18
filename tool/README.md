@@ -11,9 +11,18 @@ class Tool(args):
             "atgs2": "what args2 should be..."
         }
         """
+    def description(self):
+        return self.description
+    def jsonload(self):
+        return self.jsonload
+    def jsonrun(self,json):
+        message = json['args1']
+        address = json['args2']
+        return Tool.run(args)
+    @staticmethod
     def run(args):
         # just DIY the function for what you want
-        pass
+        return output
 ```
 ## 注意事项
 * 请写清楚api的输入输出的要求(What AI should know before using this api and would know after using this api)
