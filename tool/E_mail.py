@@ -14,7 +14,7 @@ SENDER = os.getenv("SENDER","")
 class SendEmail():
     def __init__(self):
         self.description = "<send email> to use this tool you need know the address of the receiver, and the message you want to send"
-        self.jsonload = """
+        self.jsonloadF = """
         {
             "message": "the message to send",
             "address": "the address of the receiver",
@@ -23,7 +23,7 @@ class SendEmail():
     def description(self):
         return self.description
     def jsonload(self):
-        return self.jsonload
+        return self.json
     def jsonrun(self,json):
         message = json['message']
         address = json['address']

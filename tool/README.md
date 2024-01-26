@@ -9,6 +9,8 @@ class Tool(args):
         {
             "args1": "what args1 should be..."
             "atgs2": "what args2 should be..."
+            ...
+            "argsN": "what argsN should be..."
         }
         """
     def description(self):
@@ -16,14 +18,15 @@ class Tool(args):
     def jsonload(self):
         return self.jsonload
     def jsonrun(self,json):
-        message = json['args1']
-        address = json['args2']
+        args1 = json['args1']
+        args2 = json['args2']
         return Tool.run(args)
     @staticmethod
     def run(args):
         # just DIY the function for what you want
         return output
 ```
+==在函数进行调用的时候会输入== Tool.jsonrun(json)其中json的形式与上述的jsonload的形式一致
 ## 注意事项
 * 请写清楚api的输入输出的要求(What AI should know before using this api and would know after using this api)
 * 一个文件只能对应一个方法，一个类
