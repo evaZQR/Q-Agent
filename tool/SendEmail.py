@@ -11,9 +11,9 @@ SENDER = os.getenv("SENDER","")
 #print(MAIL_HOST,MAIL_USER,MAIL_PASSWORD,SENDER)
 #设置服务器所需信息
 #163邮箱服务器地址
-class SendEmail():
+class SendEmail:
     def __init__(self):
-        self.description = "<send email> to use this tool you need know the address of the receiver, and the message you want to send"
+        self.description = "<send email>: to use this tool you need know the address of the receiver, and the message you want to send"
         self.jsonloadF = """
         {
             "message": "the message to send",

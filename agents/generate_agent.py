@@ -1,49 +1,62 @@
-from .call import openai_call
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from agents.call import openai_call
 from typing import Dict, List
+import json
+import importlib
 import os
 OBJECTIVE = os.getenv("OBJECTIVE", "")
 import re
 
 def task_creation_agent(
-        objective: str, result: Dict, task_description: str, task_list: List[str]
+        objective: str, result: Dict, task_description: str
 ):
     prompt = f"""
-You are to use the result from an execution agent to create new tasks with the following objective: {objective}.
+You are to use the result from an execution agent to create a new tasks with the following objective: {objective}.
 The last completed task has the result: \n{result["data"]}
 This result was based on this task description: {task_description}.\n"""
 
-    if task_list:
-        prompt += f"These are incomplete tasks: {', '.join(task_list)}\n"
-    prompt += "Based on the result, return a list of tasks to be completed in order to meet the objective. "
-    if task_list:
-        prompt += "These new tasks must not overlap with incomplete tasks. "
-
+    prompt += "Based on the result, return a task to be completed in order to meet the objective.\n "
+    prompt += "The task you propose must be solvable by one of the following tools. Note that before using this tool, you must have the required input data, which can be obtained from previous tasks or judged by yourself. The following is a description of all tools:\n"
+    
+    task_descriptions = []
+    module_files = [f for f in os.listdir("./tool") if f.endswith(".py") and not f.endswith("_no.py")]
+    for module in module_files:
+        module_name = os.path.splitext(module)[0]
+        module = importlib.import_module(f"tool.{module_name}")
+        cls = getattr(module, module_name)
+        if cls:
+            instance = cls()
+            task_descriptions.append(instance.description)
+    task_descriptions = "\n".join(task_descriptions)
+    prompt += task_descriptions
     prompt += """
-Return one task per line in your response. The result must be a numbered list in the format:
-
-#. First task
-#. Second task
-
-The number of each entry must be followed by a period. If your list is empty(there is no need to add tasks),you should only write "Stop"
-Unless your list is empty, do not include any headers before your numbered list or follow your numbered list with any other output."""
+    Return only one task in your response. The result must strictly be in the format:
+    {
+        "thought": Why do you generate this task.
+        "the new task": A simple discription of the new task you generate.
+    }
+    """
 
     #print(f'\n*****TASK CREATION AGENT PROMPT****\n{prompt}\n')
-    response = openai_call(prompt, max_tokens=2000)
-    print(f'\n****TASK CREATION AGENT RESPONSE****\n{response}\n')
-    if response == "Stop":
-        return []
-    new_tasks = response.split('\n')
-    new_tasks_list = []
-    for task_string in new_tasks:
-        task_parts = task_string.strip().split(".", 1)
-        if len(task_parts) == 2:
-            task_id = ''.join(s for s in task_parts[0] if s.isnumeric())
-            task_name = re.sub(r'[^\w\s_]+', '', task_parts[1]).strip()
-            if task_name.strip() and task_id.isnumeric():
-                new_tasks_list.append(task_name)
-            # print('New task created: ' + task_name)
-
-    out = [{"task_name": task_name} for task_name in new_tasks_list]
+    #raise ValueError("EVAstop")
+    max_try = 5
+    while max_try > 0:
+        try:
+            response = openai_call(prompt, max_tokens=2000)
+            response = json.loads(response)
+            new_task = response["the new task"]
+            new_task_thought = response["thought"]
+            break
+        except:
+            max_try -= 1
+            print(f'\033[31m****TASK CREATION AGENT ERROR****\033[0m\n{response}\nwe will try again for {max_try} times\n')
+            continue
+            
+    print(f'\n\033[32m****TASK CREATION AGENT RESPONSE****\033[0m\n{response}\n')
+    task_name = re.sub(r'[^\w\s_]+', '', new_task).strip()
+    out = {"task_name": task_name, "task_thought": new_task_thought}
     return out
 
 
@@ -81,3 +94,5 @@ Do not include any headers before your ranked list or follow your list with any 
 
     return new_tasks_list
 
+if __name__ == '__main__':
+    task_creation_agent("no",{"data": 0},"no")

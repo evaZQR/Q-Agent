@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from dotenv import load_dotenv
+import json
 
 # Load default environment variables (.env)
 load_dotenv()
@@ -68,18 +69,20 @@ def main():
 
             # Step 3: Create new tasks and re-prioritize task list
             # only the main instance in cooperative mode does that
-            new_tasks = task_creation_agent(
+            new_task = task_creation_agent(
                 OBJECTIVE,
                 enriched_result,
                 task["task_name"],
-                tasks_storage.get_task_names(),
             )
+            new_task = json.loads(new_task)
+            new_task_thought = new_task["thought"]
+            new_task_name = new_task["the new task"]
+            
 
             print('Adding new tasks to task_storage')
-            for new_task in new_tasks:
-                new_task.update({"task_id": tasks_storage.next_task_id()})
-                print(str(new_task))
-                tasks_storage.append(new_task)
+            new_task_name.update({"task_id": tasks_storage.next_task_id()})
+            print('New task name:', new_task_name)
+            tasks_storage.append(new_task)
 
             if not JOIN_EXISTING_OBJECTIVE:
                 prioritized_tasks = prioritization_agent(tasks_storage = tasks_storage)
