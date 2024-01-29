@@ -37,6 +37,7 @@ This result was based on this task description: {task_description}.\n"""
         "thought": Why do you generate this task.
         "the new task": A simple discription of the new task you generate.
     }
+    for special situation that you think you have done the work and nothing to do 
     """
 
     #print(f'\n*****TASK CREATION AGENT PROMPT****\n{prompt}\n')

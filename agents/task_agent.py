@@ -1,5 +1,7 @@
-
-from .call import openai_call
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from agents.call import openai_call
 
 # Execute a task based on the objective and five previous tasks
 def execution_agent(objective: str, task: str, results_storage) -> str:
