@@ -10,20 +10,22 @@ OBJECTIVE = os.getenv("OBJECTIVE", "")
 import re
 
 def task_creation_agent(
-        objective: str, result: Dict, task_description: str
+        objective: str, result: Dict
 ):
     prompt = f"""
 You are to use the result from an execution agent to create a new tasks with the following objective: {objective}.
-The last completed task has the result: \n{result["data"]}
-This result was based on this task description: {task_description}.\n"""
+The last completed tasks has the result: \n{result}"""
 
     prompt += "Based on the result, return a task to be completed in order to meet the objective.\n "
+    prompt += "You should not ask user for help and do the all things by yourself"
     prompt += "The task you propose must be solvable by one of the following tools. Note that before using this tool, you must have the required input data, which can be obtained from previous tasks or judged by yourself. The following is a description of all tools:\n"
     
     task_descriptions = []
     module_files = [f for f in os.listdir("./tool") if f.endswith(".py") and not f.endswith("_no.py")]
+    tools = []
     for module in module_files:
         module_name = os.path.splitext(module)[0]
+        tools.append(module_name)
         module = importlib.import_module(f"tool.{module_name}")
         cls = getattr(module, module_name)
         if cls:
@@ -35,9 +37,9 @@ This result was based on this task description: {task_description}.\n"""
     Return only one task in your response. The result must strictly be in the format:
     {
         "thought": Why do you generate this task.
-        "the new task": A simple discription of the new task you generate.
+        "Tool": The Tool you use.
+        "the new task": A simple discription of the new task you generate. The discription should be clear and short.
     }
-    for special situation that you think you have done the work and nothing to do 
     """
 
     #print(f'\n*****TASK CREATION AGENT PROMPT****\n{prompt}\n')
@@ -49,6 +51,14 @@ This result was based on this task description: {task_description}.\n"""
             response = json.loads(response)
             new_task = response["the new task"]
             new_task_thought = response["thought"]
+            new_task_tool = response["Tool"]
+            tool_is_found = False
+            for tool in tools:
+                if new_task_tool .lower() == tool.lower() or new_task_tool in tool or tool in new_task_tool:
+                    new_task_tool = tool
+                    tool_is_found = True
+                    break
+            if tool_is_found is False: raise ValueError("connot find")
             break
         except:
             max_try -= 1
@@ -57,7 +67,7 @@ This result was based on this task description: {task_description}.\n"""
             
     print(f'\n\033[32m****TASK CREATION AGENT RESPONSE****\033[0m\n{response}\n')
     task_name = re.sub(r'[^\w\s_]+', '', new_task).strip()
-    out = {"task_name": task_name, "task_thought": new_task_thought}
+    out = {"task_name": task_name, "task_thought": new_task_thought,"task_tool":new_task_tool}
     return out
 
 

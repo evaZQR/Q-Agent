@@ -2,17 +2,17 @@ import wikipediaapi
 
 class WikipediaSummaryTool:
     def __init__(self):
-        self.description = "<Wikipedia Summary Tool>: Fetches the summary of a Wikipedia page, takes language and title as input, and outputs the first 60 characters of the page summary."
-        self.jsonload = """
+        self.description = "<WikipediaSummaryTool>: Fetches the summary of a Wikipedia page, takes language and title as input, and outputs the first 60 characters of the page summary."
+        self.jsonloadF = """
         {
             "language": "The language of the page content (e.g., 'en' for English)",
-            "title": "The title of the Wikipedia page"
+            "title": "Something you should find"
         }
         """
     def description(self):
         return self.description
     def jsonload(self):
-        return self.jsonload
+        return self.jsonloadF
     def jsonrun(self, json):
         language = json['language']
         title = json['title']

@@ -41,20 +41,35 @@ def main():
     while loop:
         # As long as there are tasks in the storage...
         #if not tasks_storage.is_empty():
-        thought, status = check(OBJECTIVE,enriched_result)
+        status ,thought = check(OBJECTIVE,enriched_result)
+
+        if status == "Done":
+            ans = "Q-Agent have completed the objective\n"
+            ans += "The result is:\n" + enriched_result
+            print(ans)
+            loop = False
+            break
+        elif status == "Unable":
+            ans = "Q-Agent cannot do the objective\nbecause:"+ thought
+            print(ans)
+            loop = False
+            break
+        else:
+            print("\ntest:"+thought+"\n\n")
         print('Adding new tasks to task_storage')
         new_task = task_creation_agent(
             OBJECTIVE,
             enriched_result,
-            task["task_name"],
         )
-        new_task = json.loads(new_task)
-        new_task_thought = new_task["thought"]
-        new_task_name = new_task["the new task"]
+        new_task_thought = new_task["task_thought"]
+        new_task_name = new_task["task_name"]
+        new_task_tool = new_task["task_tool"]
 
-        new_task_name.update({"task_id": tasks_storage.next_task_id()})
+        new_task.update({"task_id": tasks_storage.next_task_id()})
         print('New task name:', new_task_name)
+        print('New task thought:', new_task_thought)
         tasks_storage.append(new_task)
+
 
         if not JOIN_EXISTING_OBJECTIVE:
             prioritized_tasks = prioritization_agent(tasks_storage = tasks_storage)
@@ -72,7 +87,8 @@ def main():
 
 
             
-        result = execution_agent(OBJECTIVE, str(task["task_name"]), results_storage=results_storage)
+        result = execution_agent(OBJECTIVE, new_task_tool)
+        raise ValueError("Q-Agent testing edge!!! you get the wrong .")
         print("\033[93m\033[1m" + "\n*****TASK RESULT*****\n" + "\033[0m\033[0m")
         print(result)
 

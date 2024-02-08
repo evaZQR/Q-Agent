@@ -5,7 +5,7 @@
 class Tool(args):
     def __init__(self,args):
         self.description = "<Tool name> the function of this tool, its input and its output"
-        self.jsonload = """
+        self.jsonloadF = """
         {
             "args1": "what args1 should be..."
             "atgs2": "what args2 should be..."
@@ -16,7 +16,7 @@ class Tool(args):
     def description(self):
         return self.description
     def jsonload(self):
-        return self.jsonload
+        return self.jsonloadF
     def jsonrun(self,json):
         args1 = json['args1']
         args2 = json['args2']

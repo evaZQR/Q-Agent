@@ -13,7 +13,7 @@ SENDER = os.getenv("SENDER","")
 #163邮箱服务器地址
 class SendEmail:
     def __init__(self):
-        self.description = "<send email>: to use this tool you need know the address of the receiver, and the message you want to send"
+        self.description = "<SendEmail>: to use this tool you need know the address of the receiver, and the message you want to send"
         self.jsonloadF = """
         {
             "message": "the message to send",
