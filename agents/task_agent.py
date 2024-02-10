@@ -1,9 +1,9 @@
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from agents.call import GeminiPro
 from agents.call import openai_call
 import importlib
-import json
 
 # Execute a task based on the objective and five previous tasks
 def execution_agent(task: str, tool) -> str:
@@ -33,25 +33,10 @@ def execution_agent(task: str, tool) -> str:
     #    prompt += 'Take into account these previously completed tasks:' + '\n'.join(context)
     prompt = f"now you should follow the task:\n{task}\n to make the json data"
     prompt +="your response should strictly be in the format:\n" + instance.jsonloadF
-    #result = openai_call(prompt)
-    #order = json.loads(result)
-    #print(result)
-    #print(order)
-    #print(run_order(order))
-    #raise ValueError("EVA stop")
-    max_try = 0
-    while max_try<5:
-        try:
-            order = openai_call(prompt)
-            print(order)
-            order_json = json.loads(order)
-            result = run_order(order_json)
-            return result
-        except:
-            max_try+=1
-            print(f"something wrong in generating task_order, try the {max_try} time")
-            continue
-
+    try:
+        print(openai_call(prompt))
+    except Exception:
+        print(GeminiPro.genai_call(prompt))
 # Get the top n completed tasks for the objective
 def context_agent(query: str, top_results_num: int, results_storage):
     """
