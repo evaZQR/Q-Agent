@@ -1,6 +1,7 @@
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from agents.call import GeminiPro
 from agents.call import openai_call
 from typing import Dict, List
 import json
@@ -47,7 +48,11 @@ The last completed tasks has the result: \n{result}"""
     max_try = 5
     while max_try > 0:
         try:
-            response = openai_call(prompt, max_tokens=2000)
+            try:  
+                response = openai_call(prompt, max_tokens=2000)
+            except NameError:
+                response = GeminiPro.genai_call(prompt, max_tokens=2000)
+     
             response = json.loads(response)
             new_task = response["the new task"]
             new_task_thought = response["thought"]
@@ -88,7 +93,11 @@ The entries must be consecutively numbered, starting with 1. The number of each 
 Do not include any headers before your ranked list or follow your list with any other output."""
 
     #print(f'\n****TASK PRIORITIZATION AGENT PROMPT****\n{prompt}\n')
-    response = openai_call(prompt, max_tokens=2000)
+    try:  
+        response = openai_call(prompt, max_tokens=2000)
+    except NameError:
+        response = GeminiPro.genai_call(prompt, max_tokens=2000)
+     
     #print(f'\n****TASK PRIORITIZATION AGENT RESPONSE****\n{response}\n')
     if not response:
         print('Received empty response from priotritization agent. Keeping task list unchanged.')
