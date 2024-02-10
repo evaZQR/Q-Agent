@@ -2,6 +2,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from agents.call import openai_call
+from agents.call import GeminiPro
 import importlib
 import json
 """
@@ -29,7 +30,7 @@ Regardless of what is returned, the reason needs to be explained in "thought".""
             instance = cls()
             task_descriptions.append(instance.description)
     task_descriptions = "\n".join(task_descriptions)
-    prompt += task_descriptions
+    prompt += task_descriptions    
     prompt += """
     Your response must strictly be in the format:
     {
@@ -40,7 +41,11 @@ Regardless of what is returned, the reason needs to be explained in "thought".""
     max_try = 5
     while max_try > 0:
         try:
-            response = openai_call(prompt, max_tokens=2000)
+            try:  
+                response = openai_call(prompt, max_tokens=2000)
+            except NameError:
+                response = GeminiPro.genai_call(prompt, max_tokens=2000)   
+                 
             response = json.loads(response)
             confirm = response["status"]
             if confirm == "Done" or confirm.startswith("D"):
