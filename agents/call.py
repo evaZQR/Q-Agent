@@ -4,6 +4,10 @@ from extensions.human_mode import user_input_await
 import tiktoken as tiktoken
 import time
 
+import google.generativeai as genai
+from google.generativeai.types import safety_types
+from google.ai import generativelanguage as glm
+
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 openai.api_base = "http://flag.smarttrot.com/index.php/api/v1"
 
@@ -94,3 +98,72 @@ def openai_call(
             time.sleep(10)  # Wait 10 seconds and try again
         else:
             break
+
+class GeminiPro:
+    def __init__(self,
+                 GOOGLE_API_KEY=""):
+        self.model = genai.GenerativeModel('gemini-pro')
+        self.chat = self.model.start_chat(history=[])
+        self.latest_response = None
+        # Or use `os.getenv('GOOGLE_API_KEY')` to fetch an environment variable.
+        self.GOOGLE_API_KEY=GOOGLE_API_KEY
+        genai.configure(api_key=self.GOOGLE_API_KEY)
+        self.safety_settings = [
+        {
+            "category": "HARM_CATEGORY_HARASSMENT",
+            "threshold": "BLOCK_NONE",
+        },
+        {
+            "category": "HARM_CATEGORY_HATE_SPEECH",
+            "threshold": "BLOCK_NONE",
+        },
+        {
+            "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+            "threshold": "BLOCK_NONE",
+        },
+        {
+            "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            "threshold": "BLOCK_NONE",
+        },
+        ]
+        
+    def genai_call(self, prompt):
+        try:
+            response = self.chat.send_message(prompt,safety_settings=self.safety_settings,
+            generation_config=genai.types.GenerationConfig(
+            # Only one candidate for now.
+            candidate_count=1,
+            temperature=0.0,
+            max_output_tokens=1024))
+            try:
+                self.latest_response = response.text
+            except ValueError:
+                self.latest_response = response.prompt_feedback
+            
+            
+        except:
+            max_retry = 10
+            for j in range(max_retry):
+                try:
+                    print(f"Retring: {j}/{max_retry} ")
+                    response = self.chat.send_message(prompt,safety_settings=self.safety_settings,
+                                            generation_config=genai.types.GenerationConfig(
+                    # Only one candidate for now.
+                    candidate_count=1,
+                    temperature=0.0))
+                    
+                    try:
+                        self.latest_response = response.text
+                    except ValueError:
+                        self.latest_response = response.prompt_feedback
+                    
+                except:
+                    time.sleep(5)
+            else:
+                # raise RuntimeError("Max retry exceeded")
+                self.latest_response = "I don't know."
+                
+        return self.latest_response
+    
+    def refresh_history(self):
+        self.chat = self.model.start_chat(history=[])
